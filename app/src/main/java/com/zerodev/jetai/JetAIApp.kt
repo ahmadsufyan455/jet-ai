@@ -28,8 +28,11 @@ import androidx.compose.ui.unit.dp
 import com.google.ai.client.generativeai.GenerativeModel
 import com.zerodev.jetai.model.Chat
 import com.zerodev.jetai.repository.ChatRepositoryImpl
+import com.zerodev.jetai.ui.common.UIState
 import com.zerodev.jetai.ui.components.AppBar
 import com.zerodev.jetai.ui.components.ChatCard
+import com.zerodev.jetai.ui.components.ErrorView
+import com.zerodev.jetai.ui.components.LoadingIndicator
 import com.zerodev.jetai.ui.components.TextInput
 import com.zerodev.jetai.ui.theme.JetAITheme
 import com.zerodev.jetai.viewmodel.ChatViewModel
@@ -39,28 +42,45 @@ fun JetAIApp(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
     Scaffold(
         topBar = { AppBar() }
     ) { innerPadding ->
-        val messageList by viewModel.messageList.collectAsState()
+        val uiState by viewModel.uiState.collectAsState()
         val listState = rememberLazyListState()
 
-        LaunchedEffect(messageList) {
-            listState.animateScrollToItem(messageList.size - 1)
-        }
+        when (uiState) {
+            is UIState.Loading -> {
+                LoadingIndicator()
+            }
 
-        Column(
-            modifier = modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-                .imePadding()
-        ) {
-            MessageList(messageList, modifier = Modifier.weight(1f), listState)
-            TextInput(
-                modifier = Modifier
-                    .padding(
-                        horizontal = 16.dp,
-                        vertical = 8.dp
-                    )
-            ) { message ->
-                viewModel.sendMessage(message)
+            is UIState.Success -> {
+                val messageList = (uiState as UIState.Success).messages
+
+                LaunchedEffect(messageList) {
+                    listState.animateScrollToItem(messageList.size - 1)
+                }
+
+                Column(
+                    modifier = modifier
+                        .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding)
+                        .imePadding()
+                ) {
+                    MessageList(messageList, modifier = Modifier.weight(1f), listState)
+                    TextInput(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 8.dp
+                            )
+                    ) { message ->
+                        viewModel.sendMessage(message)
+                    }
+                }
+            }
+
+            is UIState.Error -> {
+                val errorMessage = (uiState as UIState.Error).message
+                ErrorView(errorMessage, (uiState as UIState.Error).messages) { message ->
+                    viewModel.sendMessage(message)
+                }
             }
         }
     }

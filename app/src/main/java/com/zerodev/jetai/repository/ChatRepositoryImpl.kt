@@ -4,8 +4,10 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.zerodev.jetai.model.Chat
 import com.zerodev.jetai.model.ChatRoleEnum
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -16,16 +18,17 @@ class ChatRepositoryImpl @Inject constructor(private val generativeModel: Genera
         message: String
     ): Flow<Chat> {
         return flow {
+            val history = messageList.map { chat ->
+                content(chat.role) { text(chat.message) }
+            }
             try {
-                val chat = generativeModel.startChat(
-                    history = messageList.map { chat ->
-                        content(chat.role) { text(chat.message) }
-                    }.toList()
-                )
-                val response = chat.sendMessage(message)
-                emit(Chat(response.text.toString(), ChatRoleEnum.MODEL.value, true))
+                val response = withContext(Dispatchers.IO) {
+                    val chat = generativeModel.startChat(history)
+                    chat.sendMessage(message)
+                }
+                emit(Chat(response.text.orEmpty(), ChatRoleEnum.MODEL.value, true))
             } catch (e: Exception) {
-                emit(Chat(e.toString(), ChatRoleEnum.MODEL.value, true))
+                emit(Chat("Error: ${e.localizedMessage}", ChatRoleEnum.MODEL.value, true))
             }
         }
     }
