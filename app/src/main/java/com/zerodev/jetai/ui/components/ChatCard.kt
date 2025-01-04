@@ -12,15 +12,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.zerodev.jetai.R
 import com.zerodev.jetai.model.Chat
 import com.zerodev.jetai.ui.theme.JetAITheme
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun ChatCard(chat: Chat, modifier: Modifier = Modifier) {
-    val cardColor = if (chat.direction) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val cardColor =
+        if (chat.direction) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -47,13 +51,17 @@ fun ChatCard(chat: Chat, modifier: Modifier = Modifier) {
         ) {
             Box(contentAlignment = Alignment.Center) {
                 if (chat.isTypingIndicator) {
-                    TypingIndicator( modifier = Modifier.padding(12.dp))
+                    TypingIndicator(modifier = Modifier.padding(12.dp))
                 } else {
                     MarkdownText(
                         modifier = Modifier.padding(12.dp),
                         markdown = chat.message,
                         isTextSelectable = true,
-                        style = MaterialTheme.typography.bodyLarge
+                        fontResource = R.font.ubuntu_regular,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 10.sp,
+                        )
                     )
                 }
             }

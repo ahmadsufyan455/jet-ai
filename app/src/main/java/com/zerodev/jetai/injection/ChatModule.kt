@@ -17,7 +17,7 @@ object ChatModule {
     @Singleton
     fun provideGenerativeModel(): GenerativeModel {
         return GenerativeModel(
-            modelName = "gemini-pro",
+            modelName = "gemini-1.5-flash",
             apiKey = BuildConfig.API_KEY
         )
     }
