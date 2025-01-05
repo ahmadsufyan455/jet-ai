@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,42 +46,38 @@ fun JetAIApp(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
         val uiState by viewModel.uiState.collectAsState()
         val listState = rememberLazyListState()
 
-        when (uiState) {
-            is UIState.Loading -> {
-                LoadingIndicator()
-            }
-
-            is UIState.Success -> {
-                val messageList = (uiState as UIState.Success).messages
-
-                LaunchedEffect(messageList) {
-                    listState.animateScrollToItem(messageList.size - 1)
+        Column(
+            modifier = modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
+        ) {
+            when (uiState) {
+                is UIState.Loading -> {
+                    LoadingIndicator(modifier = Modifier.weight(1f))
                 }
-
-                Column(
-                    modifier = modifier
-                        .padding(innerPadding)
-                        .consumeWindowInsets(innerPadding)
-                        .imePadding()
-                ) {
+                is UIState.Success -> {
+                    val messageList = (uiState as UIState.Success).messages
+                    LaunchedEffect(messageList) {
+                        listState.animateScrollToItem(messageList.size - 1)
+                    }
                     MessageList(messageList, modifier = Modifier.weight(1f), listState)
-                    TextInput(
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 16.dp,
-                                vertical = 8.dp
-                            )
-                    ) { message ->
+                }
+                is UIState.Error -> {
+                    val errorMessage = (uiState as UIState.Error).message
+                    ErrorView(errorMessage, (uiState as UIState.Error).messages, modifier = Modifier.weight(1f)) { message ->
                         viewModel.sendMessage(message)
                     }
                 }
             }
-
-            is UIState.Error -> {
-                val errorMessage = (uiState as UIState.Error).message
-                ErrorView(errorMessage, (uiState as UIState.Error).messages) { message ->
-                    viewModel.sendMessage(message)
-                }
+            TextInput(
+                modifier = Modifier
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    )
+            ) { message ->
+                viewModel.sendMessage(message)
             }
         }
     }
@@ -103,7 +100,7 @@ fun MessageList(messages: List<Chat>, modifier: Modifier = Modifier, listState: 
                     .size(250.dp)
             )
             Text(
-                text = "Looks like it's a bit quiet here... Start a conversation to bring this space to life!",
+                text = stringResource(R.string.start_conversation),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     textAlign = TextAlign.Center
                 )

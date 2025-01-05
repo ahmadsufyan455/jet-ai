@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Jet AI</string>
+    <string name="start_conversation">Looks like it\'s a bit quiet here… Start a conversation to bring this space to life!</string>
+    <string name="retry">Retry</string>
+    <string name="no_speech_detected">No speech detected</string>
+    <string name="type_your_message">Type your message…</string>
+    <string name="speak_now">Speak now…</string>
 </resources>
