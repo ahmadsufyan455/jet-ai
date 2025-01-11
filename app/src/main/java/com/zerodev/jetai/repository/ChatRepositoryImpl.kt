@@ -1,35 +1,33 @@
 package com.zerodev.jetai.repository
 
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
+import com.zerodev.jetai.db.ChatDao
+import com.zerodev.jetai.db.ChatSessionDao
 import com.zerodev.jetai.model.Chat
-import com.zerodev.jetai.model.ChatRoleEnum
-import kotlinx.coroutines.Dispatchers
+import com.zerodev.jetai.model.ChatSession
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
-import java.lang.Exception
 import javax.inject.Inject
 
-class ChatRepositoryImpl @Inject constructor(private val generativeModel: GenerativeModel) :
-    ChatRepository {
-    override suspend fun sendMessage(
-        messageList: List<Chat>,
-        message: String
-    ): Flow<Chat> {
-        return flow {
-            val history = messageList.map { chat ->
-                content(chat.role) { text(chat.message) }
-            }
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    val chat = generativeModel.startChat(history)
-                    chat.sendMessage(message)
-                }
-                emit(Chat(response.text.orEmpty(), ChatRoleEnum.MODEL.value, true))
-            } catch (e: Exception) {
-                emit(Chat("Error: ${e.localizedMessage}", ChatRoleEnum.MODEL.value, true))
-            }
-        }
+class ChatRepositoryImpl @Inject constructor(
+    private val chatSessionDao: ChatSessionDao,
+    private val chatDao: ChatDao
+) : ChatRepository {
+    override suspend fun insertChatSession(chatSession: ChatSession) {
+        chatSessionDao.insertChatSession(chatSession)
+    }
+
+    override fun getAllChatSessions(): Flow<List<ChatSession>> {
+        return chatSessionDao.getAllChatSessions()
+    }
+
+    override suspend fun deleteChatSession(chatSession: ChatSession) {
+        chatSessionDao.deleteChatSession(chatSession)
+    }
+
+    override fun getChatsBySessionId(sessionId: String): Flow<List<Chat>> {
+        return chatDao.getChatsBySessionId(sessionId)
+    }
+
+    override suspend fun insertChat(chat: Chat) {
+        chatDao.insertChat(chat)
     }
 }

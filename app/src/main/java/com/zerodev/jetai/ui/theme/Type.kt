@@ -24,7 +24,7 @@ val Typography = Typography(
     ),
     labelSmall = TextStyle(
         fontFamily = ubuntuFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         fontSize = 11.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp

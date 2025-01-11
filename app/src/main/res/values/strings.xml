@@ -5,4 +5,9 @@
     <string name="no_speech_detected">No speech detected</string>
     <string name="type_your_message">Type your message…</string>
     <string name="speak_now">Speak now…</string>
+    <string name="start_new_chat">Start new chat</string>
+    <string name="start_new_chat_message">Are you sure you want to start new chat?</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="chat_history">Chat history</string>
 </resources>

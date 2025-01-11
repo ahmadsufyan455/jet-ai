@@ -19,13 +19,21 @@ import com.zerodev.jetai.ui.theme.JetAITheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(modifier: Modifier = Modifier) {
+fun AppBar(modifier: Modifier = Modifier, onNewChatClick: () -> Unit, onMenuClick: () -> Unit) {
     TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_menu),
+                    contentDescription = null,
+                )
+            }
+        },
         title = {
             Text("Chat With Jet AI", fontSize = 18.sp)
         },
         actions = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = onNewChatClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_edit),
                     contentDescription = null,
@@ -49,6 +57,6 @@ fun AppBar(modifier: Modifier = Modifier) {
 @Composable
 private fun AppBarPreview() {
     JetAITheme {
-        AppBar(modifier = Modifier.padding(8.dp))
+        AppBar(modifier = Modifier.padding(8.dp), onNewChatClick = {}, onMenuClick = {})
     }
 }

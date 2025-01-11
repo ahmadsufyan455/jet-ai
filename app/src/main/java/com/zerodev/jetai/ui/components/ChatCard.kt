@@ -23,8 +23,11 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun ChatCard(chat: Chat, modifier: Modifier = Modifier) {
-    val cardColor =
-        if (chat.direction) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val cardColor = if (chat.direction) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.secondary
+    }
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -73,6 +76,6 @@ fun ChatCard(chat: Chat, modifier: Modifier = Modifier) {
 @Composable
 private fun ChatCardPreview() {
     JetAITheme {
-        ChatCard(chat = Chat("Hello", "User", false))
+        ChatCard(chat = Chat(sessionId = "", message = "Hello", role = "User", direction = false))
     }
 }

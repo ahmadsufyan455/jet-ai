@@ -16,8 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetAITheme {
-                val chatViewmodel = hiltViewModel<ChatViewModel>()
-                JetAIApp(viewModel = chatViewmodel)
+                val chatViewModel = hiltViewModel<ChatViewModel>()
+                JetAIApp(chatViewModel = chatViewModel)
             }
         }
     }
