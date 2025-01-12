@@ -13,4 +13,5 @@
     <string name="clear_history">Clear history</string>
     <string name="clear_history_message">Are you sure you want to clear history ?</string>
     <string name="history_successfully_deleted">history data successfully deleted</string>
+    <string name="no_chat_history">No chat history</string>
 </resources>
