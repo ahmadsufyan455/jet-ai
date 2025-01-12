@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -101,6 +102,7 @@ class ChatViewModel @Inject constructor(
             val chatsSession = chatRepository.getChatsBySessionId(sessionId).first()
             _chats.value = chatsSession
             _uiState.value = UIState.Success(chats.value)
+            currentSessionId = sessionId
         }
     }
 
@@ -116,9 +118,24 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun deleteChatSession(chatSession: ChatSession) {
+    fun deleteChatSession(sessionId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.deleteChatSession(chatSession)
+            chatRepository.deleteChatSession(sessionId)
+        }
+    }
+
+    fun deleteAllSession() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                chatRepository.deleteAllSession()
+                withContext(Dispatchers.Main) {
+                    _uiState.value = UIState.Success(emptyList())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _uiState.value = UIState.Error("${e.message}", _chats.value)
+                }
+            }
         }
     }
 

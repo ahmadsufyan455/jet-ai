@@ -1,7 +1,6 @@
 package com.zerodev.jetai.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.zerodev.jetai.model.ChatSession
@@ -15,6 +14,9 @@ interface ChatSessionDao {
     @Insert
     suspend fun insertChatSession(chatSession: ChatSession)
 
-    @Delete
-    suspend fun deleteChatSession(chatSession: ChatSession)
+    @Query("DELETE FROM chat_sessions WHERE sessionId = :sessionId")
+    suspend fun deleteChatSession(sessionId: String)
+
+    @Query("DELETE FROM chat_sessions")
+    suspend fun deleteAllSessions()
 }

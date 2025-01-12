@@ -10,4 +10,6 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="chat_history">Chat history</string>
+    <string name="clear_history">Clear history</string>
+    <string name="clear_history_message">Are you sure you want to clear history ?</string>
 </resources>

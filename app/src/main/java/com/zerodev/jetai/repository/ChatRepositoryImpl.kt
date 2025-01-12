@@ -19,8 +19,12 @@ class ChatRepositoryImpl @Inject constructor(
         return chatSessionDao.getAllChatSessions()
     }
 
-    override suspend fun deleteChatSession(chatSession: ChatSession) {
-        chatSessionDao.deleteChatSession(chatSession)
+    override suspend fun deleteChatSession(sessionId: String) {
+        chatSessionDao.deleteChatSession(sessionId)
+    }
+
+    override suspend fun deleteAllSession() {
+        chatSessionDao.deleteAllSessions()
     }
 
     override fun getChatsBySessionId(sessionId: String): Flow<List<Chat>> {

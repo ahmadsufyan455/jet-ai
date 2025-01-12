@@ -5,7 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import com.zerodev.jetai.R
 
 @Composable
 fun ConfirmationDialog(
@@ -38,4 +40,23 @@ fun ConfirmationDialog(
             }
         )
     }
+}
+
+@Composable
+fun ShowConfirmationDialog(
+    titleRes: Int,
+    messageRes: Int,
+    showDialog: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ConfirmationDialog(
+        title = stringResource(titleRes),
+        message = stringResource(messageRes),
+        confirmButtonText = stringResource(R.string.confirm),
+        dismissButtonText = stringResource(R.string.cancel),
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        showDialog = showDialog
+    )
 }

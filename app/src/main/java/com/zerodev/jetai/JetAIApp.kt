@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,7 +33,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,10 +46,10 @@ import com.zerodev.jetai.repository.GenerativeModelRepositoryImpl
 import com.zerodev.jetai.ui.common.UIState
 import com.zerodev.jetai.ui.components.AppBar
 import com.zerodev.jetai.ui.components.ChatCard
-import com.zerodev.jetai.ui.components.ChatSessionItem
-import com.zerodev.jetai.ui.components.ConfirmationDialog
 import com.zerodev.jetai.ui.components.ErrorView
 import com.zerodev.jetai.ui.components.LoadingIndicator
+import com.zerodev.jetai.ui.components.NavigationDrawerContent
+import com.zerodev.jetai.ui.components.ShowConfirmationDialog
 import com.zerodev.jetai.ui.components.TextInput
 import com.zerodev.jetai.ui.theme.JetAITheme
 import com.zerodev.jetai.viewmodel.ChatViewModel
@@ -63,9 +60,15 @@ fun JetAIApp(
     modifier: Modifier = Modifier,
     chatViewModel: ChatViewModel
 ) {
-    var showDialog by remember { mutableStateOf(false) }
+    var startNewChatDialog by remember { mutableStateOf(false) }
+    var deleteAllSessionDialog by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val uiState by chatViewModel.uiState.collectAsState()
+    val chatSessions by chatViewModel.chatSessions.collectAsState()
+    var sessionId by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -81,28 +84,36 @@ fun JetAIApp(
                     }
                 },
                 onNewChatClick = {
-                    showDialog = true
+                    startNewChatDialog = true
                 }
             )
         }
     ) { innerPadding ->
-        val uiState by chatViewModel.uiState.collectAsState()
-        val chatSessions by chatViewModel.chatSessions.collectAsState()
-        val listState = rememberLazyListState()
-
-        ConfirmationDialog(
-            title = stringResource(R.string.start_new_chat),
-            message = stringResource(R.string.start_new_chat_message),
-            confirmButtonText = stringResource(R.string.confirm),
-            dismissButtonText = stringResource(R.string.cancel),
+        // Clear history confirmation dialog
+        ShowConfirmationDialog(
+            titleRes = R.string.clear_history,
+            messageRes = R.string.clear_history_message,
+            showDialog = deleteAllSessionDialog,
             onConfirm = {
-                showDialog = false
+                chatViewModel.deleteAllSession()
+                deleteAllSessionDialog = false
+                scope.launch {
+                    drawerState.close()
+                }
+            },
+            onDismiss = { deleteAllSessionDialog = false }
+        )
+
+        // Start new chat confirmation dialog
+        ShowConfirmationDialog(
+            titleRes = R.string.start_new_chat,
+            messageRes = R.string.start_new_chat_message,
+            showDialog = startNewChatDialog,
+            onConfirm = {
+                startNewChatDialog = false
                 chatViewModel.resetSession()
             },
-            onDismiss = {
-                showDialog = false
-            },
-            showDialog = showDialog
+            onDismiss = { startNewChatDialog = false }
         )
 
         ModalNavigationDrawer(
@@ -110,28 +121,15 @@ fun JetAIApp(
             drawerState = drawerState,
             gesturesEnabled = drawerState.isOpen,
             drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp * 0.7f)
-                ) {
-                    Text(
-                        stringResource(R.string.chat_history),
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                    LazyColumn(modifier = Modifier.padding(8.dp)) {
-                        items(chatSessions) { chatSession ->
-                            ChatSessionItem(chatSession) {
-                                chatViewModel.getChatsBySessionId(chatSession.sessionId)
-                                scope.launch {
-                                    drawerState.close()
-                                }
-                            }
-                        }
-                    }
-                }
+                NavigationDrawerContent(
+                    chatSessions = chatSessions,
+                    chatViewModel = chatViewModel,
+                    sessionId = sessionId,
+                    drawerState = drawerState,
+                    scope = scope,
+                    modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp * 0.7f),
+                    onDeleteSessions = { deleteAllSessionDialog = true }
+                )
             },
             content = {
                 Column(
