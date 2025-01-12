@@ -17,6 +17,9 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -63,7 +66,9 @@ fun JetAIApp(
     var startNewChatDialog by remember { mutableStateOf(false) }
     var deleteAllSessionDialog by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val uiState by chatViewModel.uiState.collectAsState()
     val chatSessions by chatViewModel.chatSessions.collectAsState()
@@ -87,6 +92,9 @@ fun JetAIApp(
                     startNewChatDialog = true
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         }
     ) { innerPadding ->
         // Clear history confirmation dialog
@@ -99,6 +107,11 @@ fun JetAIApp(
                 deleteAllSessionDialog = false
                 scope.launch {
                     drawerState.close()
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.history_successfully_deleted),
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short
+                    )
                 }
             },
             onDismiss = { deleteAllSessionDialog = false }
